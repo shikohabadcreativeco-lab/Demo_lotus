@@ -23,13 +23,13 @@ export type UserRecord = {
 
 type SessionRecord = {
   token: string;
-  userId: string;
+  userId: ObjectId | string;
   role: string;
   fullName: string;
   email: string;
   phone: string;
-  createdAt: string;
-  expiresAt: string;
+  createdAt: Date | string;
+  expiresAt: Date | string;
 };
 
 type FileStore = {

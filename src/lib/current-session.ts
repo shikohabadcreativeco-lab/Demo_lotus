@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import { cookies } from "next/headers";
 import { findSession } from "@/lib/accounts";
 
@@ -8,10 +9,7 @@ export async function currentAccount() {
   const session = await findSession(token);
   if (!session) return null;
 
-  const userId =
-    session.userId && typeof session.userId === "object" && "toHexString" in session.userId
-      ? session.userId.toHexString()
-      : String(session.userId ?? "");
+  const userId = session.userId instanceof ObjectId ? session.userId.toHexString() : String(session.userId ?? "");
 
   return {
     userId,

@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
+import { ReviewsExperience } from "@/components/storefront/reviews/reviews-experience";
+
+export const metadata: Metadata = {
+  title: "Reviews | Lotus Lights",
+  description:
+    "Read customer stories about Lotus Lights and share how a lamp changed your room.",
+};
+
 export default function ReviewsPage() {
-  return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-12">
-      <h1 className="text-2xl font-semibold">Reviews</h1>
-    </section>
-  );
+  return <ReviewsExperience />;
 }

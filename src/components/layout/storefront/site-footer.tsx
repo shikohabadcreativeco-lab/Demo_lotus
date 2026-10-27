@@ -13,25 +13,31 @@ const columns = [
   {
     title: "Support",
     links: [
-      { href: "/contact", label: "FAQs" },
-      { href: "/contact", label: "Shipping Policy" },
-      { href: "/contact", label: "Terms & Conditions" },
+      { href: "/faqs", label: "FAQs" },
+      { href: "/shipping-policy", label: "Shipping Policy" },
+      { href: "/returns", label: "Returns" },
+      { href: "/terms", label: "Terms & Conditions" },
     ],
   },
 ];
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-neutral-200 bg-white text-neutral-700">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:px-8">
-        <BrandLogo />
+    <footer className="mt-auto bg-[#1c1917] text-[#e7e0d4]">
+      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.3fr] lg:px-8">
+        <div className="sm:col-span-2 lg:col-span-1">
+          <BrandLogo tone="light" />
+          <p className="mt-4 max-w-xs text-sm leading-6 text-white/60">
+            Warm lights for homes, offices, showrooms, and stores. Made in Firozabad.
+          </p>
+        </div>
         {columns.map((column) => (
           <nav key={column.title} aria-label={column.title}>
-            <p className="text-sm font-semibold text-neutral-950">{column.title}</p>
-            <ul className="mt-4 space-y-2 text-sm text-neutral-500">
+            <p className="text-[11px] font-semibold tracking-[0.22em] text-[#c6a15a] uppercase">{column.title}</p>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/70">
               {column.links.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="hover:text-neutral-900">
+                  <Link href={link.href} className="hover:text-white">
                     {link.label}
                   </Link>
                 </li>
@@ -40,37 +46,48 @@ export function SiteFooter() {
           </nav>
         ))}
         <div>
-          <p className="text-sm font-semibold text-neutral-950">Contact</p>
-          <ul className="mt-4 space-y-2 text-sm text-neutral-500">
+          <p className="text-[11px] font-semibold tracking-[0.22em] text-[#c6a15a] uppercase">Contact</p>
+          <ul className="mt-4 space-y-2.5 text-sm text-white/70">
             <li>
-              <a href="tel:+919876543210">+91 98765 43210</a>
+              <a href="tel:+919876543210" className="hover:text-white">+91 98765 43210</a>
             </li>
             <li>
-              <a href="mailto:support@lotuslights.in">support@lotuslights.in</a>
+              <a href="mailto:support@lotuslights.in" className="break-all hover:text-white">support@lotuslights.in</a>
             </li>
-            <li>Bengaluru, India</li>
+            <li>Firozabad, India</li>
           </ul>
-          <div className="mt-5 flex gap-3 text-neutral-700">
-            <a href="mailto:support@lotuslights.in" aria-label="Email" className="hover:text-neutral-950">
+          <div className="mt-5 flex gap-3 text-[#e6c48a]">
+            <a href="mailto:support@lotuslights.in" aria-label="Email" className="hover:text-white">
               <MailIcon />
             </a>
-            <Link href="/reviews" aria-label="Reviews" className="hover:text-neutral-950">
+            <Link href="/reviews" aria-label="Reviews" className="hover:text-white">
               <PlayIcon />
             </Link>
-            <Link href="/shop" aria-label="Shop" className="hover:text-neutral-950">
+            <Link href="/shop" aria-label="Shop" className="hover:text-white">
               <BagIcon />
             </Link>
           </div>
         </div>
       </div>
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 border-t border-neutral-200 px-4 py-5 text-xs text-neutral-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 border-t border-white/10 px-4 py-5 text-xs text-white/50 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p>© 2026 Lotus Lights. All rights reserved.</p>
+        <p>
+          Developed by{" "}
+          <a
+            href="https://www.instagram.com/skb_creative/"
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-[#e6c48a] hover:text-white"
+          >
+            Shikohabad Creative Co.
+          </a>
+        </p>
         <p className="flex gap-3">
-          <Link href="/contact" className="hover:text-neutral-900">
+          <Link href="/privacy" className="hover:text-white">
             Privacy Policy
           </Link>
           <span aria-hidden="true">|</span>
-          <Link href="/contact" className="hover:text-neutral-900">
+          <Link href="/terms" className="hover:text-white">
             Terms & Conditions
           </Link>
         </p>

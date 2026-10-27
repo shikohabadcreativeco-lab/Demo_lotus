@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const reviews = [
   {
     quote:
@@ -21,18 +23,28 @@ export function ReviewsSection() {
   return (
     <section aria-labelledby="reviews-heading" className="pb-8 text-neutral-900">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <p className="text-center text-[11px] font-semibold tracking-[0.28em] text-[#c6a15a]">STORIES</p>
         <h2
           id="reviews-heading"
-          className="text-center text-3xl font-semibold tracking-tight sm:text-4xl"
+          className="mt-3 text-center text-3xl font-semibold tracking-tight text-[#1c1917] sm:text-4xl"
         >
-          Loved by Our Customers
+          Loved by our customers
         </h2>
+        <p className="mt-3 text-center">
+          <Link
+            href="/reviews"
+            className="text-sm font-medium text-[#8a6a32] underline-offset-4 hover:underline"
+          >
+            Read all stories
+          </Link>
+        </p>
         <ul className="mt-10 grid gap-5 md:grid-cols-3">
           {reviews.map((review) => (
             <li
               key={review.name}
-              className="flex flex-col rounded-3xl bg-white p-6 shadow-[0_10px_30px_rgba(40,32,20,0.06)]"
+              className="relative flex flex-col overflow-hidden rounded-3xl border border-[#ece4d6] bg-white p-6 shadow-[0_12px_32px_rgba(28,25,23,0.05)]"
             >
+              <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-[#c6a15a]" />
               <Stars />
               <p className="mt-4 flex-1 text-sm leading-6 text-neutral-600">{review.quote}</p>
               <div className="mt-6 flex items-center gap-3">

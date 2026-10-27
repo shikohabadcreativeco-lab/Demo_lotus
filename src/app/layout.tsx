@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Lotus Lights",
-  description: "Modern lighting for a brighter home",
+  description: "Modern lighting for homes, offices, showrooms, and stores",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

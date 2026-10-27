@@ -71,11 +71,18 @@ export function PasswordField({
   );
 }
 
-export function GoldButton({ children }: { children: ReactNode }) {
+export function GoldButton({
+  children,
+  disabled,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="submit"
-      className="h-12 w-full rounded-lg bg-[#c6a15a] text-sm font-medium text-white transition-colors hover:bg-[#b69048]"
+      disabled={disabled}
+      className="h-12 w-full rounded-lg bg-[#c6a15a] text-sm font-medium text-white transition-colors hover:bg-[#b69048] disabled:cursor-not-allowed disabled:opacity-60"
     >
       {children}
     </button>

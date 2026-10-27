@@ -3,24 +3,24 @@ import Link from "next/link";
 
 const rooms = [
   {
-    title: "Living Room",
+    title: "Home",
     image: "/images/home/living-room.jpg",
-    alt: "Living room with warm table lamps",
+    alt: "Warm lamps in a living room",
   },
   {
-    title: "Bedroom",
-    image: "/images/home/bedroom.jpg",
-    alt: "Bedroom with glowing bedside lamps",
-  },
-  {
-    title: "Workspace",
+    title: "Office",
     image: "/images/home/workspace.jpg",
-    alt: "Desk with a sculptural lamp and a plant",
+    alt: "A lamp lighting a desk",
   },
   {
-    title: "Dining Room",
+    title: "Showroom",
     image: "/images/home/dining-room.jpg",
-    alt: "Lounge and dining area with warm lamps",
+    alt: "Warm lamps displayed in a lounge",
+  },
+  {
+    title: "Store",
+    image: "/images/home/promo-lamp.jpg",
+    alt: "A glowing lamp on a dark display",
   },
 ];
 
@@ -29,19 +29,20 @@ export function CategorySection() {
     <section aria-labelledby="rooms-heading" className="text-neutral-900">
       <div className="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 id="rooms-heading" className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Designed for Modern Living
+          <p className="text-[11px] font-semibold tracking-[0.28em] text-[#c6a15a]">THE ROOMS</p>
+          <h2 id="rooms-heading" className="mt-3 text-3xl font-semibold tracking-tight text-[#1c1917] sm:text-4xl">
+            Made for every space
           </h2>
           <p className="mt-4 text-sm leading-7 text-neutral-500 sm:text-base">
-            Elegant. Functional. Timeless. Our premium lighting solution brings
-            warmth and sophistication to every space.
+            The same lamps light a home, an office, a showroom, and a store.
+            Warm, modern, and ready for the room you have.
           </p>
         </div>
-        <ul className="mt-12 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+        <ul className="mt-12 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
           {rooms.map((room) => (
             <li key={room.title}>
               <Link href="/shop" className="group block">
-                <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl shadow-[0_10px_30px_rgba(40,32,20,0.08)]">
+                <span className="relative block aspect-[3/4] overflow-hidden rounded-3xl shadow-[0_16px_36px_rgba(28,25,23,0.12)] sm:aspect-[4/5]">
                   <Image
                     src={room.image}
                     alt={room.alt}
@@ -49,9 +50,15 @@ export function CategorySection() {
                     sizes="(min-width: 1024px) 25vw, 50vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                </span>
-                <span className="mt-3 block text-sm font-semibold text-neutral-800 sm:text-base">
-                  {room.title}
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                  <span className="absolute inset-x-0 bottom-0 p-4 text-white">
+                    <span className="text-[10px] font-semibold tracking-[0.22em] text-[#e6c48a] sm:text-[11px]">
+                      SPACE
+                    </span>
+                    <span className="mt-1 block text-lg font-semibold tracking-tight sm:text-xl">
+                      {room.title}
+                    </span>
+                  </span>
                 </span>
               </Link>
             </li>

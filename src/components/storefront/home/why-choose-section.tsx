@@ -25,19 +25,20 @@ export function WhyChooseSection() {
   return (
     <section aria-labelledby="why-heading" className="py-16 text-neutral-900 lg:py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <p className="text-center text-[11px] font-semibold tracking-[0.28em] text-[#c6a15a]">THE STUDIO</p>
         <h2
           id="why-heading"
-          className="text-center text-3xl font-semibold tracking-tight sm:text-4xl"
+          className="mt-3 text-center text-3xl font-semibold tracking-tight text-[#1c1917] sm:text-4xl"
         >
-          Why Choose Lotus Lights?
+          Why choose Lotus Lights
         </h2>
-        <ul className="mt-12 grid grid-cols-2 gap-y-10 md:grid-cols-4 md:divide-x md:divide-neutral-200">
+        <ul className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {reasons.map((reason) => (
-            <li key={reason.title} className="flex flex-col items-center px-4 text-center">
-              <span className="grid size-16 place-items-center rounded-full border border-neutral-200 text-[#c6a15a]">
+            <li key={reason.title} className="flex flex-col items-center rounded-3xl border border-[#ece4d6] bg-white px-3 py-6 text-center shadow-[0_12px_32px_rgba(28,25,23,0.04)] sm:px-4">
+              <span className="grid size-14 place-items-center rounded-full border border-[#e6dccb] bg-[#fbf7ef] text-[#c6a15a]">
                 {reason.icon}
               </span>
-              <span className="mt-4 text-sm font-semibold sm:text-base">{reason.title}</span>
+              <span className="mt-4 text-sm font-semibold text-[#1c1917] sm:text-base">{reason.title}</span>
               <span className="mt-1 max-w-[12rem] text-xs leading-5 text-neutral-500">
                 {reason.detail}
               </span>

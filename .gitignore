@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# local account store used when MongoDB is not running
+.data
+
+# product photos uploaded from the admin
+/public/uploads
+
 # vercel
 .vercel
 

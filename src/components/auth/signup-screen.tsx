@@ -6,7 +6,7 @@ import {
 } from "@/components/auth/auth-split";
 import { SignupForm } from "@/components/auth/signup-form";
 
-export function SignupScreen() {
+export function SignupScreen({ nextPath = "/" }: { nextPath?: string }) {
   return (
     <AuthSplit
       image="/images/auth/signup-panel.jpg"
@@ -18,14 +18,14 @@ export function SignupScreen() {
           Your Account
         </>
       }
-      description="Join thousands of happy customers and bring beautiful lighting into your home."
+      description="Join customers who use Lotus Lights in homes, offices, showrooms, and stores."
       features={[
         { label: "Free Shipping", icon: <TruckIcon /> },
         { label: "1 Year Warranty", icon: <WarrantyIcon /> },
         { label: "Secure Payment", icon: <LockIcon /> },
       ]}
     >
-      <SignupForm />
+      <SignupForm nextPath={nextPath} />
     </AuthSplit>
   );
 }

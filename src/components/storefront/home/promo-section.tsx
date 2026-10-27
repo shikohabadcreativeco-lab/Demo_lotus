@@ -44,11 +44,11 @@ export function PromoSection() {
             >
               More Than Just a Light
               <br />
-              A Better Way to Live
+              For every kind of space
             </h2>
             <p className="mt-4 max-w-md text-sm leading-6 text-white/80">
-              Transform your home with a lighting experience that&apos;s designed
-              for comfort, style and well-being.
+              Use Lotus Lights in a home, an office, a showroom, or a store.
+              The same warm light works in all of them.
             </p>
             <Link
               href="/shop"
@@ -58,13 +58,18 @@ export function PromoSection() {
             </Link>
           </div>
         </div>
-        <ul className="mt-8 grid grid-cols-2 gap-6 rounded-3xl bg-white px-5 py-6 shadow-[0_8px_24px_rgba(40,32,20,0.04)] md:grid-cols-4 md:divide-x md:divide-neutral-200">
+        <ul className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           {highlights.map((item) => (
-            <li key={item.title} className="flex items-center gap-3 md:px-4 md:first:pl-0">
-              <span className="text-[#c6a15a]">{item.icon}</span>
-              <span>
+            <li
+              key={item.title}
+              className="flex items-center gap-3 rounded-2xl border border-[#ece4d6] bg-white px-3 py-4 shadow-[0_10px_24px_rgba(28,25,23,0.04)]"
+            >
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#fbf7ef] text-[#c6a15a]">
+                {item.icon}
+              </span>
+              <span className="min-w-0">
                 <span className="block text-sm font-semibold">{item.title}</span>
-                <span className="block text-xs text-neutral-500">{item.detail}</span>
+                <span className="block text-xs leading-5 text-neutral-500">{item.detail}</span>
               </span>
             </li>
           ))}
@@ -76,7 +81,7 @@ export function PromoSection() {
 
 function BoltIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-8" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <path d="M13 3.5 6.5 13h5l-1 7.5L18 11h-5l0-7.5Z" />
     </svg>
   );
@@ -84,7 +89,7 @@ function BoltIcon() {
 
 function SparkIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-8" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <path d="M12 4.5c.4 2.4 1.6 3.6 4 4-2.4.4-3.6 1.6-4 4-.4-2.4-1.6-3.6-4-4 2.4-.4 3.6-1.6 4-4Z" />
       <path d="M17.5 14.5c.2 1.1.8 1.7 1.9 1.9-1.1.2-1.7.8-1.9 1.9-.2-1.1-.8-1.7-1.9-1.9 1.1-.2 1.7-.8 1.9-1.9Z" />
     </svg>
@@ -93,7 +98,7 @@ function SparkIcon() {
 
 function PlugIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-8" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <path d="M9 4.5v5M15 4.5v5" />
       <path d="M8 9.5h8v2.2a4 4 0 0 1-4 4 4 4 0 0 1-4-4V9.5Z" />
       <path d="M12 15.7V19" />
@@ -103,7 +108,7 @@ function PlugIcon() {
 
 function ClockIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-8" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <circle cx="12" cy="12" r="7" />
       <path d="M12 8.5V12l2.4 1.6" />
     </svg>

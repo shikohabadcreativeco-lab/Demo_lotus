@@ -22,7 +22,7 @@ export function CtaSection() {
               Ready to Transform Your Space?
             </h2>
             <p className="mt-3 text-sm text-white/80">
-              Get the perfect lighting for your home today.
+              Light a home, an office, a showroom, or a store.
             </p>
             <Link
               href="/shop"

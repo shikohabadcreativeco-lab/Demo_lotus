@@ -1,14 +1,52 @@
 "use client";
 
 import Link from "next/link";
+import { useState, type FormEvent } from "react";
 import { GoldButton, PasswordField, SocialAuth, TextField } from "@/components/auth/auth-fields";
 
-export function SignupForm() {
+export function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    setPending(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          fullName: String(data.get("name") ?? ""),
+          email: String(data.get("email") ?? ""),
+          phoneCountryCode: String(data.get("countryCode") ?? "+91"),
+          phoneNumber: String(data.get("phone") ?? ""),
+          password: String(data.get("password") ?? ""),
+          termsAccepted: data.get("terms") === "on",
+        }),
+      });
+      const body = (await response.json()) as { success?: boolean; message?: string };
+
+      if (!response.ok || !body.success) {
+        setError(body.message ?? "Unable to create your account.");
+        return;
+      }
+
+      window.location.assign(nextPath);
+    } catch {
+      setError("Unable to create your account right now.");
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
-    <form
-      className="flex flex-col gap-4"
-      onSubmit={(event) => event.preventDefault()}
-    >
+    <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <div>
         <h1 className="text-3xl font-semibold tracking-tight text-neutral-950">
           Create an Account
@@ -16,6 +54,11 @@ export function SignupForm() {
         <p className="mt-2 text-sm text-neutral-500">
           Sign up to get started with Lotus Lights
         </p>
+        {error ? (
+          <p className="mt-3 text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        ) : null}
       </div>
       <TextField
         label="Full Name"
@@ -68,20 +111,25 @@ export function SignupForm() {
         />
         <span>
           I agree to the{" "}
-          <a href="/contact" className="text-[#c6a15a]">
+          <Link href="/terms" className="text-[#c6a15a]">
             Terms &amp; Conditions
-          </a>{" "}
+          </Link>{" "}
           and{" "}
-          <a href="/contact" className="text-[#c6a15a]">
+          <Link href="/privacy" className="text-[#c6a15a]">
             Privacy Policy
-          </a>
+          </Link>
         </span>
       </label>
-      <GoldButton>Create Account</GoldButton>
+      <GoldButton disabled={pending}>
+        {pending ? "Creating account..." : "Create Account"}
+      </GoldButton>
       <SocialAuth />
       <p className="text-center text-sm text-neutral-500">
         Already have an account?{" "}
-        <Link href="/login" className="font-semibold text-[#c6a15a]">
+        <Link
+          href={nextPath === "/" ? "/login" : `/login?next=${encodeURIComponent(nextPath)}`}
+          className="font-semibold text-[#c6a15a]"
+        >
           Sign In
         </Link>
       </p>

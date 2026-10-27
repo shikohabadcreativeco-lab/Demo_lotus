@@ -15,6 +15,7 @@ export function AuthSplit({
   description,
   features,
   children,
+  back,
 }: {
   image: string;
   imageAlt: string;
@@ -22,11 +23,12 @@ export function AuthSplit({
   description: string;
   features: Feature[];
   children: ReactNode;
+  back?: ReactNode;
 }) {
   return (
     <div className="flex min-h-full flex-1 bg-[#e8e4dc] p-3 font-sans text-neutral-900 sm:p-4 lg:p-5">
       <div className="mx-auto grid w-full max-w-[1480px] overflow-hidden rounded-[28px] bg-white shadow-[0_18px_50px_rgba(40,32,20,0.08)] lg:min-h-[calc(100vh-2.5rem)] lg:grid-cols-[11fr_9fr]">
-        <aside className="relative min-h-[460px] text-white">
+        <aside className="relative min-h-[240px] text-white sm:min-h-[320px] lg:min-h-[460px]">
           <Image
             src={image}
             alt={imageAlt}
@@ -36,9 +38,9 @@ export function AuthSplit({
             className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/75" />
-          <div className="relative flex h-full min-h-[460px] flex-col p-8 sm:p-10 lg:min-h-full">
+          <div className="relative flex h-full min-h-[240px] flex-col p-6 sm:min-h-[320px] sm:p-10 lg:min-h-full">
             <BrandLogo tone="light" />
-            <div className="mt-16 max-w-sm">
+            <div className="mt-8 max-w-sm sm:mt-16">
               <h2 className="text-4xl font-semibold leading-[1.12] tracking-tight sm:text-5xl">
                 {headline}
               </h2>
@@ -55,13 +57,15 @@ export function AuthSplit({
           </div>
         </aside>
         <section className="flex flex-col bg-white px-6 py-6 sm:px-12 lg:px-14">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 self-end text-sm text-neutral-500 transition-colors hover:text-neutral-800"
-          >
-            <span aria-hidden="true">←</span>
-            Back to Home
-          </Link>
+          {back ?? (
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 self-end text-sm text-neutral-500 transition-colors hover:text-neutral-800"
+            >
+              <span aria-hidden="true">←</span>
+              Back to Home
+            </Link>
+          )}
           <div className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center py-8">
             {children}
           </div>

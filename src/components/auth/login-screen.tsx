@@ -1,3 +1,4 @@
+import { AdminLoginScreen } from "@/components/auth/admin-login-screen";
 import {
   AuthSplit,
   DesignIcon,
@@ -6,7 +7,11 @@ import {
 } from "@/components/auth/auth-split";
 import { LoginForm } from "@/components/auth/login-form";
 
-export function LoginScreen() {
+export function LoginScreen({ nextPath = "/" }: { nextPath?: string }) {
+  if (nextPath.startsWith("/admin")) {
+    return <AdminLoginScreen nextPath={nextPath} />;
+  }
+
   return (
     <AuthSplit
       image="/images/auth/login-panel.jpg"
@@ -27,7 +32,7 @@ export function LoginScreen() {
         { label: "Trusted by Thousands", icon: <PeopleIcon /> },
       ]}
     >
-      <LoginForm />
+      <LoginForm nextPath={nextPath} />
     </AuthSplit>
   );
 }

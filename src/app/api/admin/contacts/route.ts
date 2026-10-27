@@ -1,0 +1,6 @@
+import { forwardAdmin } from "@/lib/admin-backend";
+
+export async function GET(request: Request) {
+  const query = new URL(request.url).search;
+  return forwardAdmin(`/api/admin/contacts${query}`, "GET");
+}

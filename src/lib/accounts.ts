@@ -38,7 +38,7 @@ type FileStore = {
 };
 
 const storePath = path.join(process.cwd(), ".data", "accounts.json");
-let mongoUnavailableUntil = 0;
+let mongoUnavailable = false;
 
 export async function findAccount(identifier: string) {
   const normalized = identifier.trim().toLowerCase();
@@ -182,25 +182,37 @@ export async function findUserById(userId: string) {
 
 export async function findSession(token: string) {
   if (!token.startsWith("lotus_")) return null;
+  await connection();
+  const now = Date.now();
   const db = await openMongo();
 
   if (db) {
-    const session = await db.collection<SessionRecord>("sessions").findOne({ token });
+    const session = await db
+      .collection<SessionRecord>("sessions")
+      .find({ token })
+      .limit(1)
+      .next();
     if (!session?.expiresAt) return null;
-    const expiresAt =
-      session.expiresAt instanceof Date ? session.expiresAt : new Date(String(session.expiresAt));
-    if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) return null;
+    const expiresAt = sessionTime(session.expiresAt);
+    if (expiresAt === null || expiresAt <= now) return null;
     return session;
   }
 
   const store = await readStore();
   const session = store.sessions.find((item) => item.token === token);
   if (!session) return null;
-  if (new Date(session.expiresAt).getTime() <= Date.now()) return null;
+  const expiresAt = sessionTime(session.expiresAt);
+  if (expiresAt === null || expiresAt <= now) return null;
   return session;
 }
 
+function sessionTime(value: Date | string) {
+  const expiresAt = value instanceof Date ? value.getTime() : Date.parse(String(value));
+  return Number.isNaN(expiresAt) ? null : expiresAt;
+}
+
 export async function listAccounts() {
+  await connection();
   const db = await openMongo();
   if (db) {
     const users = await db
@@ -236,12 +248,11 @@ export function publicUser(user: WithId<UserRecord> | (UserRecord & { _id: strin
 }
 
 async function openMongo() {
-  await connection();
-  if (Date.now() < mongoUnavailableUntil) return null;
+  if (mongoUnavailable) return null;
   try {
     return await getDb();
   } catch {
-    mongoUnavailableUntil = Date.now() + 30_000;
+    mongoUnavailable = true;
     return null;
   }
 }

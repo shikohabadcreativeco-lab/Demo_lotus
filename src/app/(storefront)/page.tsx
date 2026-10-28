@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { CategorySection } from "@/components/storefront/home/category-section";
 import { CtaSection } from "@/components/storefront/home/cta-section";
 import { HeroSection } from "@/components/storefront/home/hero-section";
@@ -12,7 +13,9 @@ export default function HomePage() {
       <CategorySection />
       <PromoSection />
       <WhyChooseSection />
-      <ReviewsSection />
+      <Suspense fallback={<div className="min-h-64" />}>
+        <ReviewsSection />
+      </Suspense>
       <CtaSection />
     </>
   );

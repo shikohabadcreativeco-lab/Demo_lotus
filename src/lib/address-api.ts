@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import type { SavedAddress } from "@/lib/customer-records";
 
-const apiUrl = process.env.API_URL ?? "http://127.0.0.1:5001";
+const apiUrl = process.env.API_URL ?? "https://lotus-light-backend.vercel.app";
 
 export type AddressInput = {
   fullName: string;

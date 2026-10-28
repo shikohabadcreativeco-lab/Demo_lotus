@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import type { ProductCategory } from "@/lib/categories";
 import type { Product, ProductImage, ProductSpec } from "@/lib/products";
 
-const apiUrl = process.env.API_URL ?? "http://127.0.0.1:5001";
+const apiUrl = process.env.API_URL ?? "https://lotus-light-backend.vercel.app";
 
 export type StoreCategory = ProductCategory & {
   id?: string;

@@ -7,6 +7,8 @@ import { GoldButton, PasswordField, SocialAuth, TextField } from "@/components/a
 export function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const [created, setCreated] = useState(false);
+  const [name, setName] = useState("");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,7 +39,8 @@ export function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
         return;
       }
 
-      window.location.assign(nextPath);
+      setName(String(data.get("name") ?? "").trim().split(" ")[0]);
+      setCreated(true);
     } catch {
       setError("Unable to create your account right now.");
     } finally {
@@ -46,6 +49,7 @@ export function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
   }
 
   return (
+    <>
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <div>
         <h1 className="text-3xl font-semibold tracking-tight text-neutral-950">
@@ -134,5 +138,29 @@ export function SignupForm({ nextPath = "/" }: { nextPath?: string }) {
         </Link>
       </p>
     </form>
+    {created ? (
+      <div className="fixed inset-0 z-50 grid place-items-center bg-black/45 px-4" role="dialog" aria-modal="true" aria-labelledby="signup-success-title">
+        <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-[0_24px_60px_rgba(20,16,10,0.22)]">
+          <span className="mx-auto grid size-14 place-items-center rounded-full bg-[#f3f8e6] text-2xl text-[#5f8c14]" aria-hidden="true">
+            ✓
+          </span>
+          <p className="mt-5 text-[11px] font-semibold tracking-[0.22em] text-[#c6a15a]">THANK YOU</p>
+          <h2 id="signup-success-title" className="mt-2 text-2xl font-semibold tracking-tight text-neutral-950">
+            {name ? `Thank you, ${name}.` : "Thank you."}
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-neutral-600">
+            Success! Your account has been created. You can now shop, save addresses, and place orders with Lotus Lights.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.assign(nextPath)}
+            className="mt-6 h-12 w-full rounded-lg bg-[#c6a15a] text-sm font-semibold text-white hover:bg-[#b69048]"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    ) : null}
+    </>
   );
 }

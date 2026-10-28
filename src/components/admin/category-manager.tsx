@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { SavedPopup } from "@/components/admin/saved-popup";
+import { useAdminAlert } from "@/components/admin/admin-toast";
+import { AdminPanel, AdminStatus, adminField, adminPrimary, adminTh } from "@/components/admin/admin-ui";
 import type { StoreCategory } from "@/lib/store-api";
 
-const fieldClass =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#1a6d78]";
+const fieldClass = adminField;
 
 const photoTypes = ["image/jpeg", "image/png", "image/webp"];
 const maxPhotoBytes = 5 * 1024 * 1024;
@@ -23,7 +23,7 @@ export function CategoryManager({
   const previewRef = useRef("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [popup, setPopup] = useState("");
+  const { notify } = useAdminAlert();
   const [pending, setPending] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -69,44 +69,47 @@ export function CategoryManager({
     const result = (await response.json()) as { message?: string };
     setPending(false);
     if (!response.ok) {
-      setError(result.message ?? "Could not create this category.");
+      const message = result.message ?? "Could not create this category.";
+      setError(message);
+      notify({ title: "Category not created", detail: message, tone: "error" });
       return;
     }
     setName("");
     setDescription("");
     clearPhoto();
     setNotice("Category added. It is saved in the database.");
-    setPopup("Category added");
+    notify({ title: "Category added", detail: "It is saved in the catalog." });
     router.refresh();
   }
 
   return (
     <div className="space-y-6">
       {source === "local" ? (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          The catalog API is offline, so this list is the built-in shop collection.
+        <p className="rounded-xl border border-[#ead9b0] bg-[#f3ead7] px-4 py-3 text-sm text-[#7a5a20]">
+          Catalog API is offline. Showing the built-in shop collection.
         </p>
       ) : null}
       {notice ? (
-        <p className="rounded-xl bg-[#dcfce7] px-4 py-3 text-sm font-medium text-[#166534]" role="alert">
+        <p className="rounded-xl border border-[#cfe3d8] bg-[#e7f3ee] px-4 py-3 text-sm text-[#1f5c45]" role="alert">
           {notice}
         </p>
       ) : null}
       {error ? (
-        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+        <p className="rounded-xl border border-[#ead4d0] bg-[#f4e4e1] px-4 py-3 text-sm text-[#8a3030]" role="alert">
           {error}
         </p>
       ) : null}
       <form
-        className="rounded-2xl border border-neutral-200 bg-white p-5"
+        className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2] p-5"
         onSubmit={(event) => {
           event.preventDefault();
           void createCategory();
         }}
       >
-        <h2 className="text-sm font-semibold">New category</h2>
+        <p className="text-[10px] font-medium tracking-[0.18em] text-[#c6a15a] uppercase">New collection</p>
+        <h2 className="mt-1 text-sm font-semibold">Add a category</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <label className="block text-sm font-medium text-neutral-800">
+          <label className="block text-sm font-medium">
             Name
             <input
               className={fieldClass}
@@ -119,7 +122,7 @@ export function CategoryManager({
               }}
             />
           </label>
-          <label className="block text-sm font-medium text-neutral-800">
+          <label className="block text-sm font-medium">
             Description
             <input
               className={fieldClass}
@@ -130,7 +133,7 @@ export function CategoryManager({
               }}
             />
           </label>
-          <div className="block text-sm font-medium text-neutral-800">
+          <div className="block text-sm font-medium">
             Photo
             <input
               ref={fileInput}
@@ -143,7 +146,7 @@ export function CategoryManager({
               }}
             />
             {preview ? (
-              <div className="mt-2 flex h-[42px] items-center gap-2 rounded-lg border border-neutral-200 px-2">
+              <div className="mt-2 flex h-10 items-center gap-2 rounded-md border border-[#ddd4c6] bg-[#f7f3eb] px-2">
                 <img src={preview} alt="" className="size-8 rounded-md object-cover" />
                 <span className="min-w-0 flex-1 truncate text-sm font-normal text-neutral-600">{photo?.name}</span>
                 <button
@@ -161,7 +164,7 @@ export function CategoryManager({
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                className="mt-2 flex h-[42px] w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[#1a6d78]/40 bg-[#f3fafa] text-sm font-semibold text-[#1a6d78] hover:border-[#1a6d78]"
+                className="mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-md border border-dashed border-[#c6a15a]/50 bg-[#f7f3eb] text-sm font-medium text-[#7a5a20] hover:border-[#c6a15a]"
               >
                 <PlusIcon />
                 Add photo
@@ -169,45 +172,47 @@ export function CategoryManager({
             )}
           </div>
         </div>
-        <p className="mt-2 text-xs text-neutral-500">JPG, PNG, or WebP from your computer, under 5 MB.</p>
-        <button
-          type="submit"
-          disabled={pending || source !== "api"}
-          className="mt-4 h-10 rounded-lg bg-[#172033] px-4 text-sm font-semibold text-[#b7f3ea] hover:bg-[#24344a] disabled:opacity-60"
-        >
+        <p className="mt-2 text-xs text-[#7a7164]">JPG, PNG, or WebP, under 5 MB.</p>
+        <button type="submit" disabled={pending || source !== "api"} className={`${adminPrimary} mt-4`}>
           {pending ? "Saving..." : "Create category"}
         </button>
       </form>
-      <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white">
+      <AdminPanel title="Collections" detail={`${categories.length} groups`}>
+      <div className="overflow-x-auto">
         <table className="w-full min-w-[44rem] text-left text-sm">
-          <thead className="border-b border-neutral-100 text-neutral-500">
+          <thead className="border-b border-[#eee6d8]">
             <tr>
-              <th className="px-5 py-3 font-medium">Category</th>
-              <th className="px-5 py-3 font-medium">Status</th>
-              <th className="px-5 py-3 font-medium">Summary</th>
-              <th className="px-5 py-3 font-medium">Actions</th>
+              <th className={adminTh}>Category</th>
+              <th className={adminTh}>Status</th>
+              <th className={adminTh}>Summary</th>
+              <th className={adminTh}>Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-neutral-100">
+          <tbody className="divide-y divide-[#f0eadf]">
             {categories.map((category) => (
-              <CategoryRow key={category.id ?? category.slug} category={category} editable={source === "api"} />
+              <CategoryRow
+                key={category.id ?? category.slug}
+                category={category}
+                editable={source === "api"}
+              />
             ))}
           </tbody>
         </table>
       </div>
-      {popup ? (
-        <SavedPopup
-          title={popup}
-          detail="It is saved in the database."
-          onClose={() => setPopup("")}
-        />
-      ) : null}
+      </AdminPanel>
     </div>
   );
 }
 
-function CategoryRow({ category, editable }: { category: StoreCategory; editable: boolean }) {
+function CategoryRow({
+  category,
+  editable,
+}: {
+  category: StoreCategory;
+  editable: boolean;
+}) {
   const router = useRouter();
+  const { notify } = useAdminAlert();
   const fileInput = useRef<HTMLInputElement>(null);
   const previewRef = useRef("");
   const [name, setName] = useState(category.name);
@@ -252,13 +257,16 @@ function CategoryRow({ category, editable }: { category: StoreCategory; editable
     const result = (await response.json()) as { message?: string; data?: { image?: string } };
     setPending(false);
     if (!response.ok) {
-      setError(result.message ?? "Could not update this category.");
+      const message = result.message ?? "Could not update this category.";
+      setError(message);
+      notify({ title: "Category not saved", detail: message, tone: "error" });
       return;
     }
     if (result.data?.image) setImage(result.data.image);
     if (preview.startsWith("blob:")) URL.revokeObjectURL(preview);
     setPhoto(null);
     setPreview("");
+    notify({ title: `${name} is saved`, detail: "The category is updated." });
     router.refresh();
   }
 
@@ -270,9 +278,15 @@ function CategoryRow({ category, editable }: { category: StoreCategory; editable
     const result = (await response.json()) as { message?: string };
     setPending(false);
     if (!response.ok) {
-      setError(result.message ?? "Could not deactivate this category.");
+      const message = result.message ?? "Could not deactivate this category.";
+      setError(message);
+      notify({ title: "Could not deactivate", detail: message, tone: "error" });
       return;
     }
+    notify({
+      title: `${name} is deactivated`,
+      detail: "This collection is now hidden from the shop.",
+    });
     router.refresh();
   }
 
@@ -281,12 +295,14 @@ function CategoryRow({ category, editable }: { category: StoreCategory; editable
   return (
     <tr>
       <td className="px-5 py-3">
-        <input className="w-full rounded-lg border border-neutral-200 px-2 py-1.5" value={name} onChange={(event) => setName(event.target.value)} disabled={!editable} />
-        {error ? <span className="mt-1 block text-xs text-red-700">{error}</span> : null}
+        <input className="h-9 w-full rounded-md border border-[#ddd4c6] bg-[#f7f3eb] px-2 text-sm" value={name} onChange={(event) => setName(event.target.value)} disabled={!editable} />
+        {error ? <span className="mt-1 block text-xs text-[#8a3030]">{error}</span> : null}
       </td>
-      <td className="px-5 py-3 text-neutral-600">{category.isActive === false ? "Hidden" : "Active"}</td>
       <td className="px-5 py-3">
-        <input className="mb-2 w-full rounded-lg border border-neutral-200 px-2 py-1.5" value={description} onChange={(event) => setDescription(event.target.value)} disabled={!editable} />
+        <AdminStatus value={category.isActive === false ? "hidden" : "active"} />
+      </td>
+      <td className="px-5 py-3">
+        <input className="mb-2 h-9 w-full rounded-md border border-[#ddd4c6] bg-[#f7f3eb] px-2 text-sm" value={description} onChange={(event) => setDescription(event.target.value)} disabled={!editable} />
         <div className="flex items-center gap-3">
           {shown ? (
             <img src={shown} alt="" className="size-12 shrink-0 rounded-lg object-cover ring-1 ring-neutral-200" />

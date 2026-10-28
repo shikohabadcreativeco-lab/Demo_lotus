@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSession } from "@/lib/accounts";
 
-const apiUrl = process.env.API_URL ?? "http://127.0.0.1:5001";
+const apiUrl = process.env.API_URL ?? "https://lotus-light-backend.vercel.app";
 
 const countryCodes = new Set(["+91", "+1", "+44"]);
 

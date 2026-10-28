@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAdminAlert } from "@/components/admin/admin-toast";
+import { AdminStat, adminField, adminPrimary } from "@/components/admin/admin-ui";
 
 type ContactStatus = "new" | "in_progress" | "resolved";
 
@@ -54,6 +56,7 @@ export function ContactInbox() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+  const { notify } = useAdminAlert();
   const selected = contacts.find((contact) => contact.id === selectedId) ?? null;
 
   useEffect(() => {
@@ -108,11 +111,14 @@ export function ContactInbox() {
     const body = (await response.json()) as { success?: boolean; message?: string; data?: Contact };
     setPending(false);
     if (!response.ok || !body.success || !body.data) {
-      setMessage(body.message || "Unable to update this message.");
+      const fail = body.message || "Unable to update this message.";
+      setMessage(fail);
+      notify({ title: "Message not saved", detail: fail, tone: "error" });
       return;
     }
     setContacts((current) => current.map((contact) => (contact.id === body.data?.id ? body.data : contact)));
     setMessage("Saved.");
+    notify({ title: "Message saved", detail: "Status and studio note are updated." });
   }
 
   async function remove() {
@@ -123,7 +129,9 @@ export function ContactInbox() {
     const body = (await response.json()) as { success?: boolean; message?: string };
     setPending(false);
     if (!response.ok || !body.success) {
-      setMessage(body.message || "Unable to remove this message.");
+      const fail = body.message || "Unable to remove this message.";
+      setMessage(fail);
+      notify({ title: "Message not removed", detail: fail, tone: "error" });
       return;
     }
     setContacts((current) => current.filter((contact) => contact.id !== selected.id));
@@ -134,15 +142,16 @@ export function ContactInbox() {
       [selected.status]: Math.max(0, current[selected.status] - 1),
     }));
     setMessage("Message removed.");
+    notify({ title: "Message removed", detail: "This enquiry is no longer in the inbox." });
   }
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat label="All messages" value={String(counts.all)} />
-        <Stat label="New" value={String(counts.new)} />
-        <Stat label="In progress" value={String(counts.in_progress)} />
-        <Stat label="Resolved" value={String(counts.resolved)} />
+        <AdminStat label="All" value={String(counts.all)} />
+        <AdminStat label="New" value={String(counts.new)} />
+        <AdminStat label="In progress" value={String(counts.in_progress)} />
+        <AdminStat label="Resolved" value={String(counts.resolved)} />
       </div>
 
       <form
@@ -158,9 +167,9 @@ export function ContactInbox() {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search name, email, or subject"
           aria-label="Search messages"
-          className="h-11 min-w-0 flex-1 rounded-xl border border-[#d5e2ea] bg-white px-4 text-sm outline-none focus:border-[#1a6d78]"
+          className={`${adminField} mt-0 h-9 min-w-0 flex-1`}
         />
-        <button type="submit" className="h-11 rounded-xl bg-[#172033] px-5 text-sm font-medium text-white">
+        <button type="submit" className={adminPrimary}>
           Search
         </button>
       </form>
@@ -175,8 +184,8 @@ export function ContactInbox() {
               setPage(1);
               setSelectedId("");
             }}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-sm ${
-              status === item.id ? "bg-[#172033] text-[#b7f3ea]" : "bg-white text-neutral-600 ring-1 ring-[#d5e2ea]"
+            className={`shrink-0 rounded-md px-3 py-1.5 text-xs font-medium tracking-wide uppercase ${
+              status === item.id ? "bg-[#141a22] text-[#f3ead7]" : "border border-[#ddd4c6] bg-[#fbf8f2] text-[#5c564c]"
             }`}
           >
             {item.label}
@@ -187,11 +196,11 @@ export function ContactInbox() {
       {error ? <p className="text-sm text-[#8a3030]">{error}</p> : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,0.9fr)]">
-        <div className="overflow-hidden rounded-2xl border border-[#d5e2ea] bg-white">
+        <div className="overflow-hidden rounded-xl border border-[#ddd4c6] bg-[#fbf8f2]">
           {contacts.length === 0 ? (
-            <p className="px-5 py-10 text-sm text-neutral-500">No messages yet.</p>
+            <p className="px-5 py-10 text-sm text-[#7a7164]">No messages yet.</p>
           ) : (
-            <ul className="divide-y divide-neutral-100">
+            <ul className="divide-y divide-[#f0eadf]">
               {contacts.map((contact) => {
                 const active = contact.id === selected?.id;
                 return (
@@ -202,9 +211,9 @@ export function ContactInbox() {
                         setSelectedId(contact.id);
                         setMessage("");
                       }}
-                      className={`flex w-full items-start gap-3 px-5 py-4 text-left ${active ? "bg-[#e5f6f4]" : "hover:bg-[#f4f8fb]"}`}
+                      className={`flex w-full items-start gap-3 px-5 py-4 text-left ${active ? "bg-[#f3ead7]" : "hover:bg-[#f3eee4]"}`}
                     >
-                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#e5f6f4] text-xs font-semibold text-[#145860]">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-md bg-[#141a22] text-xs font-semibold text-[#f3ead7]">
                         {initials(contact.name)}
                       </span>
                       <span className="min-w-0 flex-1">
@@ -240,7 +249,7 @@ export function ContactInbox() {
         </div>
 
         {selected ? (
-          <article className="rounded-2xl border border-[#d5e2ea] bg-white p-5">
+          <article className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2] p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-[#172033]">{selected.name}</h2>
@@ -259,7 +268,7 @@ export function ContactInbox() {
               <select
                 value={nextStatus}
                 onChange={(event) => setNextStatus(event.target.value as ContactStatus)}
-                className="mt-2 h-11 w-full rounded-xl border border-[#d5e2ea] bg-white px-3 text-sm outline-none focus:border-[#1a6d78]"
+                className={adminField}
               >
                 <option value="new">New</option>
                 <option value="in_progress">In progress</option>
@@ -273,7 +282,7 @@ export function ContactInbox() {
                 onChange={(event) => setNote(event.target.value.slice(0, 500))}
                 rows={4}
                 placeholder="What should the studio remember about this message?"
-                className="mt-2 w-full resize-y rounded-xl border border-[#d5e2ea] px-3 py-2 text-sm outline-none focus:border-[#1a6d78]"
+                className="mt-2 w-full resize-y rounded-md border border-[#ddd4c6] bg-[#f7f3eb] px-3 py-2 text-sm outline-none focus:border-[#c6a15a]"
               />
             </label>
             {message ? <p className="mt-3 text-sm text-neutral-600">{message}</p> : null}
@@ -282,7 +291,7 @@ export function ContactInbox() {
                 type="button"
                 disabled={pending}
                 onClick={() => void save()}
-                className="h-11 rounded-xl bg-[#172033] px-5 text-sm font-medium text-white disabled:opacity-60"
+                className={adminPrimary}
               >
                 {pending ? "Saving..." : "Save"}
               </button>
@@ -297,20 +306,11 @@ export function ContactInbox() {
             </div>
           </article>
         ) : (
-          <div className="rounded-2xl border border-dashed border-[#d5e2ea] bg-white px-5 py-10 text-sm text-neutral-500">
+          <div className="rounded-xl border border-dashed border-[#ddd4c6] bg-[#fbf8f2] px-5 py-10 text-sm text-[#7a7164]">
             Select a message to read it.
           </div>
         )}
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl border border-[#d5e2ea] bg-white p-5">
-      <p className="text-sm text-neutral-500">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-[#172033]">{value}</p>
     </div>
   );
 }

@@ -12,9 +12,51 @@ export async function POST(request: Request) {
   if (!body) return NextResponse.json({ success: false, message: "The order is incomplete." }, { status: 400 });
 
   const address = objectOf(body.address);
+  const items = Array.isArray(body.items) ? body.items.filter(isItem) : [];
+  const token = (await cookies()).get("lotus_jwt")?.value;
+  if (token) {
+    const catalog = await fetch(`${apiUrl}/api/orders`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        orderNumber: text(body.number),
+        customer: {
+          fullName: account.fullName,
+          email: account.email,
+          phone: account.phone,
+        },
+        items,
+        address: {
+          fullName: text(address.fullName),
+          phone: text(address.phone),
+          line: text(address.line),
+          city: text(address.city),
+          state: text(address.state),
+          pin: text(address.pin),
+        },
+        subtotal: numberOf(body.subtotal),
+        shipping: numberOf(body.shipping),
+        total: numberOf(body.total),
+        paymentMethod: text(body.payment),
+      }),
+      cache: "no-store",
+    }).catch(() => null);
+    if (catalog && !catalog.ok) {
+      const payload = (await catalog.json().catch(() => ({}))) as { message?: string };
+      return NextResponse.json(
+        { success: false, message: payload.message || "That lamp does not have enough stock." },
+        { status: catalog.status },
+      );
+    }
+  }
+
   const saved = await recordOrder(account.userId, {
     number: text(body.number),
-    items: Array.isArray(body.items) ? body.items.filter(isItem) : [],
+    items,
     subtotal: numberOf(body.subtotal),
     shipping: numberOf(body.shipping),
     total: numberOf(body.total),
@@ -30,34 +72,6 @@ export async function POST(request: Request) {
   });
   if ("error" in saved && saved.error) {
     return NextResponse.json({ success: false, message: saved.error }, { status: 400 });
-  }
-
-  const token = (await cookies()).get("lotus_jwt")?.value;
-  if (token && "order" in saved && saved.order) {
-    const order = saved.order;
-    await fetch(`${apiUrl}/api/orders`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        orderNumber: order.number,
-        customer: {
-          fullName: account.fullName,
-          email: account.email,
-          phone: account.phone,
-        },
-        items: order.items,
-        address: order.address,
-        subtotal: order.subtotal,
-        shipping: order.shipping,
-        total: order.total,
-        paymentMethod: order.payment,
-      }),
-      cache: "no-store",
-    }).catch(() => undefined);
   }
 
   return NextResponse.json({ success: true });

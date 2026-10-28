@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { SavedPopup } from "@/components/admin/saved-popup";
+import { useAdminAlert } from "@/components/admin/admin-toast";
 import { formatPrice } from "@/lib/products";
 
 const fieldClass =
-  "mt-2 w-full rounded-lg border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-950 outline-none placeholder:text-neutral-400 focus:border-[#1a6d78]";
+  "mt-2 h-10 w-full rounded-md border border-[#ddd4c6] bg-[#f7f3eb] px-3 text-sm text-[#141a22] outline-none placeholder:text-[#9a9184] focus:border-[#c6a15a]";
 
 const maxPhotos = 5;
 const photoTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -101,11 +101,11 @@ export function AddProductForm({
   categories: Array<{ slug: string; name: string }>;
 }) {
   const router = useRouter();
+  const { notify } = useAdminAlert();
   const fileInput = useRef<HTMLInputElement>(null);
   const photosRef = useRef<DraftPhoto[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [popup, setPopup] = useState("");
   const [pending, setPending] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [photos, setPhotos] = useState<DraftPhoto[]>([]);
@@ -184,7 +184,9 @@ export function AddProductForm({
       const response = await fetch("/api/admin/products", { method: "POST", body });
       const result = (await response.json()) as { message?: string; success?: boolean };
       if (!response.ok || !result.success) {
-        setError(result.message ?? "Could not add this product.");
+        const message = result.message ?? "Could not add this product.";
+        setError(message);
+        notify({ title: "Product not added", detail: message, tone: "error" });
         setPending(false);
         return;
       }
@@ -195,11 +197,12 @@ export function AddProductForm({
       setExtraWatt("");
       if (fileInput.current) fileInput.current.value = "";
       setNotice("Product added. It is saved in the database.");
-      setPopup("Product added");
+      notify({ title: "Product added", detail: "It is saved in the catalog." });
       setPending(false);
       router.refresh();
     } catch {
       setError("Could not add this product.");
+      notify({ title: "Product not added", detail: "Could not add this product.", tone: "error" });
       setPending(false);
     }
   }
@@ -223,7 +226,7 @@ export function AddProductForm({
   return (
     <>
     <form onSubmit={onSubmit} className="flex flex-col gap-6">
-      <div className="rounded-2xl border border-neutral-200 bg-white p-6">
+      <div className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2] p-6">
         {notice ? (
           <p className="mb-5 rounded-lg bg-[#dcfce7] px-3 py-2 text-sm font-medium text-[#166534]" role="alert">
             {notice}
@@ -494,20 +497,20 @@ export function AddProductForm({
           <button
             type="submit"
             disabled={pending}
-            className="h-11 rounded-lg bg-[#172033] px-5 text-sm font-semibold text-[#b7f3ea] hover:bg-[#24344a] disabled:opacity-60"
+            className="inline-flex h-9 items-center rounded-md bg-[#141a22] px-4 text-xs font-semibold tracking-[0.12em] text-[#f3ead7] uppercase hover:bg-[#1f2a38] disabled:opacity-60"
           >
             {pending ? "Adding product..." : "Add product"}
           </button>
           <Link
             href="/admin/products"
-            className="grid h-11 place-items-center rounded-lg border border-neutral-200 px-5 text-sm text-neutral-700 hover:border-neutral-400"
+            className="grid h-9 place-items-center rounded-md border border-[#cfc6b6] px-4 text-xs font-medium tracking-wide uppercase text-[#141a22]"
           >
             Cancel
           </Link>
         </div>
       </div>
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+      <section className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2] p-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-sm font-semibold">Photos</h2>
@@ -705,13 +708,6 @@ export function AddProductForm({
         </article>
       </section>
     </form>
-    {popup ? (
-      <SavedPopup
-        title={popup}
-        detail="It is saved in the database."
-        onClose={() => setPopup("")}
-      />
-    ) : null}
     </>
   );
 }

@@ -29,3 +29,41 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes admin-toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes admin-toast-meter {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.admin-toast-enter {
+  animation: admin-toast-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.admin-toast-meter {
+  transform-origin: left;
+  animation: admin-toast-meter 4.6s linear forwards;
+}
+
+.admin-app {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.011em;
+}
+
+.admin-app table {
+  border-collapse: collapse;
+}

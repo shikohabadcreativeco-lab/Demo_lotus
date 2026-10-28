@@ -20,7 +20,7 @@ async function OrdersContent() {
     <>
       <AdminPageHeader
         title="Orders"
-        detail="Update status, payment, shipping, and refunds."
+        detail="Status, payment, courier, and refunds for live checkouts."
       />
       {loaded.error ? <p className="mb-4 text-sm text-[#8a3030]">{loaded.error}</p> : null}
       <OrderManager

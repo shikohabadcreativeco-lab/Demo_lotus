@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
-import { publishedReviews } from "@/components/storefront/reviews/reviews-data";
+import type { StoreReview } from "@/lib/reviews-api";
 import { addItem, FREE_SHIPPING_FROM } from "@/lib/cart-store";
 import type { ProductCategory } from "@/lib/categories";
 import { formatPrice, type Product, type ProductSpec } from "@/lib/products";
@@ -55,7 +55,7 @@ export function ProductView({
     product.images.length > 0
       ? product.images
       : [{ src: category.image, alt: category.alt }];
-  const reviews = publishedReviews.filter((review) => review.product === product.name);
+  const [reviews, setReviews] = useState<StoreReview[]>([]);
   const rating =
     reviews.length === 0
       ? 0
@@ -74,6 +74,18 @@ export function ProductView({
   const [added, setAdded] = useState(false);
   const [pin, setPin] = useState("");
   const [delivery, setDelivery] = useState<"ready" | "ok" | "bad">("ready");
+
+  useEffect(() => {
+    fetch(`/api/reviews?product=${encodeURIComponent(product.name)}`, {
+      headers: { Accept: "application/json" },
+    })
+      .then((response) => response.json())
+      .then((payload: { reviews?: StoreReview[] }) => {
+        const published = (payload.reviews ?? []).filter((review) => review.status !== "rejected");
+        setReviews(published);
+      })
+      .catch(() => undefined);
+  }, [product.name]);
 
   const current = photos[Math.min(photo, photos.length - 1)];
   const longDescription =
@@ -571,15 +583,16 @@ export function ProductView({
           <h2 className="text-lg font-semibold tracking-tight text-neutral-950">Reviews</h2>
           <ul className="mt-4 grid gap-3">
             {reviews.map((review) => (
-              <li key={review.id} className="rounded-xl border border-neutral-200 bg-white px-4 py-4">
+              <li key={review._id} className="rounded-xl border border-neutral-200 bg-white px-4 py-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-neutral-900">
-                    {review.name}
-                    <span className="font-normal text-neutral-500"> · {review.city}</span>
+                    {review.user.fullName}
+                    <span className="font-normal text-neutral-500"> · {review.productName}</span>
                   </p>
                   <Stars value={review.rating} />
                 </div>
-                <p className="mt-2 text-sm leading-6 text-neutral-600">{review.quote}</p>
+                <p className="mt-2 text-sm font-medium text-neutral-900">{review.title}</p>
+                <p className="mt-1 text-sm leading-6 text-neutral-600">{review.body}</p>
               </li>
             ))}
           </ul>

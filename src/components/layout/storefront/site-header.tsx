@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { BrandLogo } from "@/components/layout/brand-logo";
+import { AccountIcon, AccountLink } from "@/components/layout/storefront/account-link";
 import { CartLink } from "@/components/layout/storefront/cart-link";
 import { SearchButton } from "@/components/layout/storefront/search-button";
 import { MobileNav, StorefrontNav } from "@/components/layout/storefront/storefront-nav";
-import { currentAccount } from "@/lib/current-session";
 
 export function SiteHeader() {
   return (
@@ -22,37 +21,5 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  );
-}
-
-async function AccountLink() {
-  const account = await currentAccount();
-  if (!account) return <AccountIcon href="/login" label="Account" />;
-  return <AccountIcon href="/profile" label="Profile" />;
-}
-
-function AccountIcon({ href, label }: { href: string; label: string }) {
-  return (
-    <Link href={href} aria-label={label} className="grid size-10 place-items-center rounded-full transition-colors hover:bg-[#f6efe2] hover:text-neutral-950">
-      <UserIcon />
-    </Link>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 24 24"
-      className="size-[22px]"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="8" r="3.25" />
-      <path d="M5.5 19.25c1.2-2.7 3.5-4 6.5-4s5.3 1.3 6.5 4" />
-    </svg>
   );
 }

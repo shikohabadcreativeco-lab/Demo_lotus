@@ -1,11 +1,13 @@
 import { ObjectId } from "mongodb";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { findSession } from "@/lib/accounts";
 
 export async function currentAccount() {
   const cookieStore = await cookies();
   const token = cookieStore.get("lotus_session")?.value;
   if (!token) return null;
+  await connection();
   const session = await findSession(token);
   if (!session) return null;
 

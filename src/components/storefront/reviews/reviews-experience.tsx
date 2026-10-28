@@ -3,36 +3,41 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState, type FormEvent, type ReactNode } from "react";
-import {
-  publishedReviews,
-  reviewSummary,
-  rooms,
-  type Review,
-  type Room,
-} from "@/components/storefront/reviews/reviews-data";
+import type { StoreReview } from "@/lib/reviews-api";
 
 const MAX_REVIEW = 400;
 
-type Filter = "all" | "5" | "4" | Room;
+type Filter = "all" | "5" | "4" | "3";
 
-export function ReviewsExperience() {
-  const [reviews, setReviews] = useState(publishedReviews);
+export type ReviewProduct = {
+  id: string;
+  name: string;
+  category: string;
+};
+
+export function ReviewsExperience({
+  initialReviews,
+  products,
+}: {
+  initialReviews: StoreReview[];
+  products: ReviewProduct[];
+}) {
+  const [reviews, setReviews] = useState(initialReviews);
   const [filter, setFilter] = useState<Filter>("all");
-  const [name, setName] = useState("");
-  const [city, setCity] = useState("");
-  const [room, setRoom] = useState<Room | "">("");
-  const [product, setProduct] = useState("");
+  const [productId, setProductId] = useState("");
+  const [title, setTitle] = useState("");
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [quote, setQuote] = useState("");
   const [notice, setNotice] = useState("");
-  const summary = reviewSummary(reviews);
+  const [pending, setPending] = useState(false);
+  const selected = products.find((product) => product.id === productId);
+  const summary = useMemo(() => summarize(reviews), [reviews]);
 
   const visible = useMemo(() => {
     return reviews.filter((review) => {
-      if (filter === "5" || filter === "4") return review.rating === Number(filter);
       if (filter === "all") return true;
-      return review.room === filter;
+      return review.rating === Number(filter);
     });
   }, [filter, reviews]);
 
@@ -40,35 +45,48 @@ export function ReviewsExperience() {
     { id: "all", label: "All stories" },
     { id: "5", label: "5 stars" },
     { id: "4", label: "4 stars" },
-    ...rooms.map((item) => ({ id: item, label: item })),
+    { id: "3", label: "3 stars" },
   ];
 
-  function shareReview(event: FormEvent<HTMLFormElement>) {
+  async function shareReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!room || rating < 1) {
-      setNotice("Choose a star rating before sharing your story.");
+    if (!productId) {
+      setNotice("Choose a lamp from the store.");
       return;
     }
-
-    const next: Review = {
-      id: `story-${Date.now()}`,
-      quote: quote.trim(),
-      name: name.trim(),
-      city: city.trim(),
-      rating,
-      room,
-      product: product.trim() || room,
-    };
-
-    setReviews((current) => [next, ...current]);
-    setFilter("all");
-    setNotice(`Thank you, ${next.name.split(" ")[0]}. Your story is now in the list.`);
-    setName("");
-    setCity("");
-    setRoom("");
-    setProduct("");
-    setRating(0);
-    setQuote("");
+    if (rating < 1) {
+      setNotice("Choose a rating from 1 to 5.");
+      return;
+    }
+    setPending(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          productId,
+          productName: selected?.name,
+          title: title.trim(),
+          body: quote.trim(),
+          rating,
+        }),
+      });
+      const payload = (await response.json()) as { success?: boolean; message?: string; review?: StoreReview };
+      if (!response.ok || !payload.success) {
+        setNotice(payload.message ?? "Could not publish this review.");
+        return;
+      }
+      if (payload.review) setReviews((current) => [payload.review as StoreReview, ...current]);
+      setNotice(payload.message ?? "Thank you. Your review is published.");
+      setTitle("");
+      setRating(0);
+      setQuote("");
+    } catch {
+      setNotice("Review API is not running.");
+    } finally {
+      setPending(false);
+    }
   }
 
   return (
@@ -110,8 +128,7 @@ export function ReviewsExperience() {
                 Customers
               </h1>
               <p className="mt-4 max-w-md text-sm leading-6 text-white/80">
-                Homes, offices, showrooms, and stores across India share how
-                Lotus Lights changed a space. Read their stories, or leave one of your own.
+                Real reviews from people using Lotus Lights at home, in an office, a showroom, or a store.
               </p>
             </div>
             <div className="hidden text-right text-white [text-shadow:0_2px_18px_rgba(0,0,0,0.55)] lg:block">
@@ -119,33 +136,15 @@ export function ReviewsExperience() {
                 {summary.average.toFixed(1)}
               </p>
               <Stars rating={Math.round(summary.average)} className="mt-2 justify-end" />
-              <p className="mt-3 text-[11px] tracking-[0.28em] text-[#e6c48a]">
-                OUT OF 5
-              </p>
+              <p className="mt-3 text-[11px] tracking-[0.28em] text-[#e6c48a]">OUT OF 5</p>
             </div>
           </div>
         </div>
         <ul className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 px-6 py-8 sm:grid-cols-2 sm:px-10 lg:grid-cols-4">
-          <Highlight
-            icon={<StarIcon />}
-            title={`${summary.average.toFixed(1)} average`}
-            detail="Across every story on this page"
-          />
-          <Highlight
-            icon={<ChatIcon />}
-            title={`${summary.total} stories`}
-            detail="From spaces using Lotus Lights"
-          />
-          <Highlight
-            icon={<SparkIcon />}
-            title={`${summary.fiveStar} five-star`}
-            detail="Customers who loved the glow"
-          />
-          <Highlight
-            icon={<PinIcon />}
-            title={`${summary.cities} cities`}
-            detail="Bengaluru, Mumbai, Delhi and more"
-          />
+          <Highlight icon={<StarIcon />} title={`${summary.average.toFixed(1)} average`} detail="From published reviews" />
+          <Highlight icon={<ChatIcon />} title={`${summary.total} reviews`} detail="Shown on the store" />
+          <Highlight icon={<SparkIcon />} title={`${summary.fiveStar} five-star`} detail="Customers who loved the glow" />
+          <Highlight icon={<PinIcon />} title={`${summary.products} lamps`} detail="Reviewed in the catalog" />
         </ul>
       </section>
 
@@ -157,18 +156,15 @@ export function ReviewsExperience() {
                 FROM OUR CUSTOMERS
                 <span aria-hidden="true" className="h-px w-8 bg-[#c6a15a]" />
               </p>
-              <h2
-                id="story-list-heading"
-                className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950"
-              >
-                Recent stories
+              <h2 id="story-list-heading" className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
+                Recent reviews
               </h2>
             </div>
             <p className="text-sm text-neutral-500">
               Showing {visible.length} of {reviews.length}
             </p>
           </div>
-          <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Filter stories">
+          <div className="mt-5 flex flex-wrap gap-2" role="group" aria-label="Filter reviews">
             {filters.map((item) => {
               const active = filter === item.id;
               return (
@@ -190,30 +186,31 @@ export function ReviewsExperience() {
           </div>
           {visible.length === 0 ? (
             <p className="mt-6 rounded-3xl border border-[#ece4d6] bg-white px-6 py-10 text-sm text-neutral-500">
-              No stories match this filter yet.
+              No reviews match this filter yet.
             </p>
           ) : (
             <ul className="mt-6 space-y-4">
               {visible.map((review) => (
                 <li
-                  key={review.id}
+                  key={review._id}
                   className="rounded-3xl border border-[#ece4d6] bg-white p-6 shadow-[0_18px_40px_rgba(28,25,23,0.05)]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <Stars rating={review.rating} />
-                    <span className="text-xs text-neutral-400">{review.room}</span>
+                    <span className="text-xs text-neutral-400">{dateLabel(review.createdAt)}</span>
                   </div>
-                  <p className="mt-4 text-sm leading-6 text-neutral-600">{review.quote}</p>
-                  <p className="mt-3 text-xs font-medium text-[#8a6a32]">{review.product}</p>
+                  <h3 className="mt-4 text-lg font-semibold text-neutral-950">{review.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-600">{review.body}</p>
+                  <p className="mt-3 text-xs font-medium text-[#8a6a32]">{review.productName}</p>
                   <div className="mt-5 flex items-center gap-3">
                     <span className="grid size-9 place-items-center rounded-full bg-[#f3eee6] text-xs font-semibold text-[#8a6a32]">
-                      {review.name.slice(0, 1)}
+                      {(review.user.fullName || "C").slice(0, 1)}
                     </span>
                     <span>
                       <span className="block text-sm font-semibold text-neutral-900">
-                        {review.name}
+                        {review.user.fullName}
                       </span>
-                      <span className="block text-xs text-neutral-500">{review.city}</span>
+                      <span className="block text-xs text-neutral-500">{review.user.email}</span>
                     </span>
                   </div>
                 </li>
@@ -230,50 +227,46 @@ export function ReviewsExperience() {
             SHARE YOUR EXPERIENCE
             <span aria-hidden="true" className="h-px w-8 bg-[#c6a15a]" />
           </p>
-          <h2
-            id="share-heading"
-            className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950"
-          >
+          <h2 id="share-heading" className="mt-3 text-3xl font-semibold tracking-tight text-neutral-950">
             Write a review
           </h2>
           <p className="mt-2 text-sm leading-6 text-neutral-500">
-            Tell us about the space, the light, and how it feels there.
+            Sign in, pick a lamp, rate it, and write a short review. This is saved as productId, rating, title, and body.
           </p>
           {notice ? (
-            <p className="mt-4 rounded-lg bg-[#f3eee6] px-4 py-3 text-sm text-neutral-800" role="status">
+            <p className={`mt-4 rounded-lg px-4 py-3 text-sm ${notice.startsWith("Thank you") ? "bg-[#f3f8e6] text-[#3f6808]" : "bg-[#f3eee6] text-neutral-800"}`} role="status">
               {notice}
             </p>
           ) : null}
           <form className="mt-6 space-y-4" onSubmit={shareReview}>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <TextField label="Full Name" name="name" required value={name} onChange={setName} placeholder="Enter your name" autoComplete="name" />
-              <TextField label="City" name="city" required value={city} onChange={setCity} placeholder="Enter your city" autoComplete="address-level2" />
-            </div>
             <label className="block text-sm font-medium text-neutral-800">
               <span>
-                Room <RequiredMark />
+                Product <RequiredMark />
               </span>
               <span className="relative mt-2 block">
                 <select
-                  name="room"
+                  name="productId"
                   required
-                  value={room}
-                  onChange={(event) => setRoom(event.target.value as Room | "")}
-                  className="h-12 w-full appearance-none rounded-lg border border-neutral-200 bg-white px-4 pr-10 text-sm text-neutral-900 outline-none invalid:text-neutral-400 focus:border-[#c6a15a]"
+                  value={productId}
+                  onChange={(event) => setProductId(event.target.value)}
+                  className="h-12 w-full appearance-none rounded-lg border border-neutral-200 bg-white px-4 pr-10 text-sm text-neutral-900 outline-none focus:border-[#c6a15a]"
                 >
                   <option value="" disabled>
-                    Select a room
+                    Choose a lamp
                   </option>
-                  {rooms.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
                     </option>
                   ))}
                 </select>
-                <ChevronIcon />
+                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-neutral-400">▾</span>
               </span>
+              {selected ? (
+                <span className="mt-1.5 block text-xs font-normal text-neutral-500">{selected.category}</span>
+              ) : null}
             </label>
-            <TextField label="Product" name="product" value={product} onChange={setProduct} placeholder="Which light did you choose?" />
+            <TextField label="Title" name="title" required value={title} onChange={setTitle} placeholder="Absolutely stunning!" />
             <fieldset>
               <legend className="text-sm font-medium text-neutral-800">
                 Rating <RequiredMark />
@@ -305,7 +298,7 @@ export function ReviewsExperience() {
             </fieldset>
             <label className="block text-sm font-medium text-neutral-800">
               <span>
-                Your story <RequiredMark />
+                Your review <RequiredMark />
               </span>
               <span className="relative mt-2 block">
                 <textarea
@@ -318,20 +311,17 @@ export function ReviewsExperience() {
                   placeholder="How did the light change your space?"
                   className="w-full resize-y rounded-lg border border-neutral-200 px-4 pt-3 pb-8 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-[#c6a15a]"
                 />
-                <span
-                  className={`pointer-events-none absolute right-3 bottom-3 text-xs ${
-                    quote.length >= MAX_REVIEW ? "text-red-500" : "text-neutral-400"
-                  }`}
-                >
+                <span className={`pointer-events-none absolute right-3 bottom-3 text-xs ${quote.length >= MAX_REVIEW ? "text-red-500" : "text-neutral-400"}`}>
                   {quote.length}/{MAX_REVIEW}
                 </span>
               </span>
             </label>
             <button
               type="submit"
-              className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-[#d7b07a] text-sm font-medium text-neutral-900 transition-colors hover:bg-[#c9a36a]"
+              disabled={pending}
+              className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-[#d7b07a] text-sm font-medium text-neutral-900 transition-colors hover:bg-[#c9a36a] disabled:opacity-60"
             >
-              Share story
+              {pending ? "Publishing..." : "Share review"}
             </button>
           </form>
         </section>
@@ -340,15 +330,24 @@ export function ReviewsExperience() {
   );
 }
 
-function Highlight({
-  icon,
-  title,
-  detail,
-}: {
-  icon: ReactNode;
-  title: string;
-  detail: string;
-}) {
+function summarize(list: StoreReview[]) {
+  const total = list.length;
+  const average = total === 0 ? 0 : list.reduce((sum, review) => sum + review.rating, 0) / total;
+  return {
+    total,
+    average,
+    fiveStar: list.filter((review) => review.rating === 5).length,
+    products: new Set(list.map((review) => review.productName)).size,
+  };
+}
+
+function dateLabel(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-IN", { dateStyle: "medium" });
+}
+
+function Highlight({ icon, title, detail }: { icon: ReactNode; title: string; detail: string }) {
   return (
     <li className="flex items-center gap-3">
       <span className="grid size-12 shrink-0 place-items-center rounded-full bg-[#f3eee6] text-[#c6a15a]">
@@ -369,7 +368,6 @@ function TextField({
   onChange,
   placeholder,
   required,
-  autoComplete,
 }: {
   label: string;
   name: string;
@@ -377,7 +375,6 @@ function TextField({
   onChange: (value: string) => void;
   placeholder: string;
   required?: boolean;
-  autoComplete?: string;
 }) {
   return (
     <label className="block text-sm font-medium text-neutral-800">
@@ -388,7 +385,6 @@ function TextField({
         name={name}
         required={required}
         value={value}
-        autoComplete={autoComplete}
         placeholder={placeholder}
         onChange={(event) => onChange(event.target.value)}
         className="mt-2 h-12 w-full rounded-lg border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none placeholder:text-neutral-400 focus:border-[#c6a15a]"
@@ -401,13 +397,7 @@ function Stars({ rating, className = "" }: { rating: number; className?: string 
   return (
     <p className={`flex gap-1 text-[#c6a15a] ${className}`} aria-label={`${rating} out of 5 stars`}>
       {Array.from({ length: 5 }, (_, index) => (
-        <svg
-          key={index}
-          viewBox="0 0 20 20"
-          className={`size-4 ${index < rating ? "" : "opacity-30"}`}
-          fill="currentColor"
-          aria-hidden="true"
-        >
+        <svg key={index} viewBox="0 0 20 20" className={`size-4 ${index < rating ? "" : "opacity-30"}`} fill="currentColor" aria-hidden="true">
           <path d="m10 1.8 2.1 4.6 5 .6-3.7 3.4.9 5-4.3-2.4L5.7 15.4l.9-5L2.9 7l5-.6L10 1.8Z" />
         </svg>
       ))}
@@ -427,14 +417,6 @@ function StarGlyph() {
   return (
     <svg viewBox="0 0 20 20" className="size-4" fill="currentColor" aria-hidden="true">
       <path d="m10 1.8 2.1 4.6 5 .6-3.7 3.4.9 5-4.3-2.4L5.7 15.4l.9-5L2.9 7l5-.6L10 1.8Z" />
-    </svg>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
-      <path d="m7 10 5 5 5-5" />
     </svg>
   );
 }

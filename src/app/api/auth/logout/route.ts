@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { deleteSession } from "@/lib/accounts";
 
-const apiUrl = process.env.API_URL ?? "http://127.0.0.1:5001";
+const apiUrl = process.env.API_URL ?? "https://lotus-light-backend.vercel.app";
 
 const clearedCookie = {
   httpOnly: true,

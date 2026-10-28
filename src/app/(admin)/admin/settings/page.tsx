@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { AdminPageHeader } from "@/components/admin/admin-shell";
+import { CopyValue } from "@/components/admin/copy-value";
 import { currentAccount } from "@/lib/current-session";
 
 const store = {
@@ -61,7 +62,7 @@ async function SettingsDetails() {
       />
 
       <div className="grid items-start gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]">
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+        <section className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2] p-6">
           <div className="flex items-center gap-4">
             <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-[#e5f6f4] text-lg font-semibold text-[#145860]">
               {initials(name)}
@@ -87,7 +88,7 @@ async function SettingsDetails() {
         </section>
 
         <div className="grid gap-6">
-          <section className="rounded-2xl border border-neutral-200 bg-white">
+          <section className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2]">
             <header className="border-b border-neutral-100 px-5 py-4 sm:px-6">
               <h2 className="text-sm font-semibold">Store profile</h2>
               <p className="mt-1 text-sm text-neutral-500">
@@ -95,10 +96,10 @@ async function SettingsDetails() {
               </p>
             </header>
             <dl className="grid sm:grid-cols-2">
-              <StoreField label="Store name" value={store.name} />
-              <StoreField label="Studio" value={store.studio} />
-              <StoreField label="Support email" value={store.email} href={`mailto:${store.email}`} />
-              <StoreField label="Support phone" value={store.phone} href={store.phoneHref} />
+              <CopyValue label="Store name" value={store.name} />
+              <CopyValue label="Studio" value={store.studio} />
+              <CopyValue label="Support email" value={store.email} href={`mailto:${store.email}`} />
+              <CopyValue label="Support phone" value={store.phone} href={store.phoneHref} />
             </dl>
           </section>
 
@@ -110,7 +111,7 @@ async function SettingsDetails() {
                 <Link
                   key={policy.title}
                   href={policy.href}
-                  className="rounded-2xl border border-neutral-200 bg-white p-5 transition-colors hover:border-[#8fd4cc]"
+                  className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2] p-5 transition-colors hover:border-[#c6a15a]"
                 >
                   <p className="text-sm text-neutral-500">{policy.title}</p>
                   <p className="mt-2 text-2xl font-semibold tracking-tight">{policy.value}</p>
@@ -120,7 +121,7 @@ async function SettingsDetails() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-neutral-200 bg-white">
+          <section className="rounded-xl border border-[#ddd4c6] bg-[#fbf8f2]">
             <header className="border-b border-neutral-100 px-5 py-4 sm:px-6">
               <h2 className="text-sm font-semibold">Manage the store</h2>
             </header>
@@ -154,31 +155,6 @@ function AccountRow({ label, value }: { label: string; value: string }) {
     <div className="flex items-baseline justify-between gap-4">
       <dt className="text-neutral-500">{label}</dt>
       <dd className="text-right font-medium">{value}</dd>
-    </div>
-  );
-}
-
-function StoreField({
-  label,
-  value,
-  href,
-}: {
-  label: string;
-  value: string;
-  href?: string;
-}) {
-  return (
-    <div className="border-t border-neutral-100 px-5 py-4 sm:px-6">
-      <dt className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-400">{label}</dt>
-      <dd className="mt-1.5 text-sm font-medium">
-        {href ? (
-          <a href={href} className="hover:text-[#1a6d78]">
-            {value}
-          </a>
-        ) : (
-          value
-        )}
-      </dd>
     </div>
   );
 }
